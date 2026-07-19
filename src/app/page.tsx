@@ -1,12 +1,34 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 
 export default function Home() {
+  const processSteps = [
+    { id: '01', title: '시작', sub: 'Diffusion', img: '/mobile/process01.png' },
+    { id: '02', title: '퍼짐', sub: 'Formation', img: '/mobile/process02.png' },
+    { id: '03', title: '가라앉음', sub: 'Clarification', img: '/mobile/process03.png' },
+    { id: '04', title: '여과 · 도달', sub: 'Filtered', img: '/mobile/process04.png' },
+    { id: '05', title: '가장 무구한 지점', sub: '無垢', img: '/mobile/process05.png' }
+  ];
+
+  const [currentProcessIndex, setCurrentProcessIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentProcessIndex((prev) => (prev + 1) % processSteps.length);
+    }, 3000); // 3 seconds per image
+    return () => clearInterval(timer);
+  }, [processSteps.length]);
+
   return (
     <div className="flex flex-col min-h-screen font-sans text-[#1A1A1A]">
       {/* Navigation */}
       <nav className="absolute top-0 left-0 w-full flex justify-between items-center px-6 md:px-16 py-8 z-50 text-white mix-blend-difference">
-        <Link href="/" className="text-2xl font-bold tracking-widest uppercase">MUGU</Link>
+        <Link href="/" className="relative w-20 h-6 md:w-28 md:h-8">
+          <Image src="/logo/white-logo.png" alt="MUGU Logo" fill className="object-contain object-left" />
+        </Link>
         <div className="hidden md:flex gap-8 text-sm tracking-wider uppercase font-medium">
           <a href="#brand" className="hover:opacity-70 transition-opacity">Brand</a>
           <a href="#product" className="hover:opacity-70 transition-opacity">Product</a>
@@ -27,7 +49,9 @@ export default function Home() {
           />
         </div>
         <div className="relative z-10 flex flex-col items-center gap-6 mt-20">
-          <h1 className="text-6xl md:text-8xl font-serif font-bold tracking-widest">MUGU</h1>
+          <div className="relative w-48 h-16 md:w-72 md:h-24">
+            <Image src="/logo/white-logo.png" alt="MUGU Logo" fill className="object-contain" />
+          </div>
           <p className="text-2xl md:text-3xl font-serif font-medium tracking-tight mt-4">가장 맑은 지점으로 향합니다</p>
           <p className="text-sm md:text-base font-light tracking-wide text-gray-300">The most clear point where alcohol can reach.</p>
         </div>
@@ -64,20 +88,53 @@ export default function Home() {
             <h2 className="text-3xl md:text-4xl font-serif font-medium">무구에 이르는 과정</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-5 h-auto md:h-[700px]">
-            {[
-              { id: '01', title: '시작', sub: 'Diffusion', img: '/mobile/process01.png' },
-              { id: '02', title: '퍼짐', sub: 'Formation', img: '/mobile/process02.png' },
-              { id: '03', title: '가라앉음', sub: 'Clarification', img: '/mobile/process03.png' },
-              { id: '04', title: '여과 · 도달', sub: 'Filtered', img: '/mobile/process04.png' },
-              { id: '05', title: '가장 무구한 지점', sub: '無垢', img: '/mobile/process05.png' }
-            ].map((step, idx) => (
-              <div key={idx} className="relative group overflow-hidden border-b md:border-b-0 md:border-r border-gray-800 last:border-0 flex flex-col justify-end p-8 h-[250px] md:h-full bg-black">
+          {/* Mobile View: Auto-play Crossfade */}
+          <div className="md:hidden relative w-full h-[500px] bg-black overflow-hidden">
+            {processSteps.map((step, idx) => (
+              <div
+                key={idx}
+                className={`absolute inset-0 transition-opacity duration-1000 ease-in-out flex flex-col justify-end p-8 ${idx === currentProcessIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                  }`}
+              >
+                <Image
+                  src={step.img}
+                  alt={step.title}
+                  fill
+                  className="object-cover opacity-60"
+                  priority={idx === 0}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+
+                <div className="text-center z-10 relative">
+                  <span className="text-sm text-gray-300 block mb-2">{step.id}</span>
+                  <h3 className="text-2xl font-serif font-medium">{step.title}</h3>
+                  <span className="text-xs text-gray-400 uppercase tracking-widest mt-2 block">{step.sub}</span>
+                </div>
+              </div>
+            ))}
+
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-3">
+              {processSteps.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentProcessIndex(idx)}
+                  className={`h-1.5 transition-all duration-500 rounded-full ${idx === currentProcessIndex ? 'w-8 bg-white' : 'w-2 bg-white/30 hover:bg-white/50'
+                    }`}
+                  aria-label={`Go to slide ${idx + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* PC View: 5 Column Grid */}
+          <div className="hidden md:grid grid-cols-5 h-[700px]">
+            {processSteps.map((step, idx) => (
+              <div key={idx} className="relative group overflow-hidden border-r border-gray-800 last:border-0 flex flex-col justify-end p-8 h-full bg-black">
                 <Image src={step.img} alt={step.title} fill className="object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-700" />
                 <div className="text-center z-10 relative">
                   <span className="text-sm text-gray-300 block mb-2">{step.id}</span>
-                  <h3 className="text-lg md:text-xl font-serif font-medium">{step.title}</h3>
-                  <span className="text-[10px] md:text-xs text-gray-400 uppercase tracking-widest mt-1 block">{step.sub}</span>
+                  <h3 className="text-xl font-serif font-medium">{step.title}</h3>
+                  <span className="text-xs text-gray-400 uppercase tracking-widest mt-1 block">{step.sub}</span>
                 </div>
               </div>
             ))}
@@ -102,7 +159,9 @@ export default function Home() {
           {/* Text Left */}
           <div className="flex-1 flex flex-col items-start gap-6 md:gap-8 order-2 md:order-1 mt-8 md:mt-0">
             <span className="text-sm tracking-widest text-gray-500 uppercase">Product</span>
-            <h2 className="text-6xl md:text-8xl font-serif font-bold tracking-widest">MUGU</h2>
+            <div className="relative w-48 h-16 md:w-72 md:h-24">
+              <Image src="/logo/black-logo.png" alt="MUGU Logo" fill className="object-contain object-left" />
+            </div>
             <span className="text-lg md:text-xl font-serif font-medium">13% / 750ml</span>
             <div className="text-gray-700 leading-relaxed space-y-2 mt-4 text-sm md:text-base">
               <p>쌀의 은은한 향과<br />미묘한 꽃 향의 단 맛이 어우러진 맑은 약주.</p>
@@ -201,7 +260,9 @@ export default function Home() {
       <footer id="contact" className="w-full bg-white py-16">
         <div className="max-w-7xl mx-auto px-6 md:px-16 flex flex-col md:flex-row justify-between items-start gap-12 md:gap-0">
           <div className="flex flex-col gap-2">
-            <h2 className="text-2xl font-serif font-bold tracking-widest uppercase">MUGU</h2>
+            <div className="relative w-24 h-8">
+              <Image src="/logo/black-logo.png" alt="MUGU Logo" fill className="object-contain object-left" />
+            </div>
             <span className="text-sm font-serif font-medium">무구</span>
           </div>
 
